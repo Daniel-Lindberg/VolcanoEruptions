@@ -4,6 +4,7 @@ Description of kaggle project: kaggle.com/c/predict-volcanic-eruptions-ingv-oe/o
 """
 
 # Native python imports
+import ast
 import csv
 import keras
 import os
@@ -24,10 +25,10 @@ class VolcanoTrainer():
         test_dir = data_dir+os.sep+"test"
         train_dir = data_dir+os.sep+"train"
 
-        self.test_files = absoluteFilePaths(test_dir)
-        self.train_Files = absoluteFilePaths(train_dir)  
-
         train_csv_path = os.path.join(data_dir,"train.csv")
+
+
+        amount_of_sensors = 10
 
         # Going to be our tuple for segment_id and time to eruption
         self.train_tuple_list = []
@@ -37,7 +38,27 @@ class VolcanoTrainer():
             # train_reader has two columns: segment_id,time_to_eruption
             next(train_reader, None) # Skip the header
             for row in train_reader:
-                self.train_tuple_list.append([int(row[0]), int(row[1])])
+                # the dict with all sensor information associated with an entry
+                sensor_dict = {}
+                # list of all sensors
+                sensor_1, sensor_2, sensor_3, sensor_4, sensor_5, sensor_6, sensor_7, sensor_8, sensor_9, sensor_10 = [],[],[],[],[],[],[],[],[],[]
+                # open train csv, read all sensor data
+                with open(train_dir+os.sep+row[0]+".csv", newline='') as train_file:
+                    segment_reader = csv.reader(train_file, delimiter=',', quotechar="|")
+                    # train_reader has ten columns: sensors[1-10]
+                    next(segment_reader, None) # Skip the header    
+                    for train_row in segment_reader:
+                        for x in range(1, len(train_row)+1):
+                            eval("sensor_{0}".format(x)).append(train_row[x-1])
+                # put sensor information into dict
+                for x in range(1, amount_of_sensors+1):
+                    sensor_dict["sensor_{0}".format(x)] = eval("sensor_{0}".format(x))
+                # put segment_id and time_to_eruption into dict
+                sensor_dict["segment_id"] = int(row[0])
+                sensor_dict["time_to_eruption"] = int(row[1])
+                self.train_tuple_list.append(sensor_dict)
+                
+        print(self.train_tuple_list[500])
         
 
 if __name__ == "__main__":
