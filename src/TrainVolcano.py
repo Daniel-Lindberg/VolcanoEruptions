@@ -6,8 +6,15 @@ Description of kaggle project: kaggle.com/c/predict-volcanic-eruptions-ingv-oe/o
 # Native python imports
 import ast
 import csv
-import keras
+#import keras
 import os
+
+import tensorflow as tf
+
+# Native python submodules
+#from tensorflow.keras import datasets, layers, models
+import matplotlib.pyplot as plt
+
 
 # Gets a list of the absolute file paths underneath a file_structure
 def absoluteFilePaths(some_dir):
@@ -33,17 +40,21 @@ class VolcanoTrainer():
         # Going to be our tuple for segment_id and time to eruption
         self.train_tuple_list = []
 
-        with open(train_csv_path, newline='') as csv_file:
+        self.temp_count = 5
+        count = 0
+        with open(train_csv_path) as csv_file:
             train_reader = csv.reader(csv_file, delimiter=',', quotechar="|")
             # train_reader has two columns: segment_id,time_to_eruption
             next(train_reader, None) # Skip the header
             for row in train_reader:
+                if count > self.temp_count:
+                    continue
                 # the dict with all sensor information associated with an entry
                 sensor_dict = {}
                 # list of all sensors
                 sensor_1, sensor_2, sensor_3, sensor_4, sensor_5, sensor_6, sensor_7, sensor_8, sensor_9, sensor_10 = [],[],[],[],[],[],[],[],[],[]
                 # open train csv, read all sensor data
-                with open(train_dir+os.sep+row[0]+".csv", newline='') as train_file:
+                with open(train_dir+os.sep+row[0]+".csv") as train_file:
                     segment_reader = csv.reader(train_file, delimiter=',', quotechar="|")
                     # train_reader has ten columns: sensors[1-10]
                     next(segment_reader, None) # Skip the header    
@@ -57,8 +68,12 @@ class VolcanoTrainer():
                 sensor_dict["segment_id"] = int(row[0])
                 sensor_dict["time_to_eruption"] = int(row[1])
                 self.train_tuple_list.append(sensor_dict)
-                
-        print(self.train_tuple_list[500])
+                count += 1
+
+    def trainModel(self):
+        batch_size =  self.temp_count
+        #TODO: write entire function         
+        
         
 
 if __name__ == "__main__":
